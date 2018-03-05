@@ -19,6 +19,7 @@ Perhaps Docker will make that possible
 - [ ] Match paths based on query string parameters
 - [ ] Match paths based on on body of the request
 - [ ] Return a random response body and status using one from paths
-- [ ] Provide a mechanism to specify which response should be used
-- [ ] Provide a mechanism to specify which response should be used based on request
+- [ ] Provide a mechanism to specify which response type should always be used
+- [ ] Provide a mechanism to specify which response type should be used based on request
+- [ ] Provide your own response based on request
 - [ ] Generate random data to fill out response body
