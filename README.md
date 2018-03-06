@@ -25,3 +25,4 @@ Perhaps Docker will make that possible
 - [ ] Provide a mechanism to specify which response type should be used based on request
 - [ ] Provide your own response based on request
 - [ ] Generate random data to fill out response body
+- [ ] Support more formats than Swagger V2
