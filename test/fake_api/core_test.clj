@@ -1,6 +1,7 @@
 (ns fake-api.core-test
   (:require [clojure.test :refer :all]
-            [fake-api.core :refer :all]))
+            [fake-api.core :refer :all]
+            [schema.core :as s]))
 
 (def request
   {
@@ -71,3 +72,40 @@
     (is (not (matches-query-params?
               {:query-params {"x" 1 "y" "a"}}
               path)))))
+
+(deftest test-swagger-params->schemas
+  (testing "empty params"
+    (is (= {} (swagger-params->schemas (:parameters path))))))
+
+(deftest test-swagger-types->schema
+  (testing "empty types"
+    (is (= {} (swagger-types->schema []))))
+  (testing "a single integer type"
+    (is (= {:a s/Int} (swagger-types->schema [{:name "a",
+                                               :required true,
+                                               :type "integer",
+                                               :format "int64"}])))
+    (is (= {:a s/Int} (swagger-types->schema [{:name "a",
+                                               :required true,
+                                               :type "integer",
+                                               :format "int32"}]))))
+  (testing "a single float"
+    (is (= {:a FloatS} (swagger-types->schema [{:name "a",
+                                               :required true,
+                                               :type "number",
+                                               :format "float"}]))))
+  (testing "a single double"
+    (is (= {:a DoubleS} (swagger-types->schema [{:name "a",
+                                                 :required true,
+                                                 :type "number",
+                                                 :format "double"}]))))
+  (testing "a single string"
+    (is (= {:a s/Str} (swagger-types->schema [{:name "a",
+                                               :required true,
+                                               :type "string"}]))))
+  ;; TODO: string binary
+  ;; TODO: string byte
+  ;; TODO: string date
+  ;; TODO: string date-time
+  ;; TODO: boolean nil
+  )
