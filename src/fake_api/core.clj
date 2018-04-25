@@ -64,14 +64,15 @@
 
 (defn matches-query-params? [request path]
   (let [query-params (:query-params request)
-        required-params (filter :required (:parameters path))]
-    (and (has-all-required-params? required-params query-params))))
+        QueryParams (swagger-types->schema (filter (fn [t] (= "query" (:in t))) (:parameters path)))]
+    (if (s/check QueryParams query-params)
+      false
+      true)))
 
 (defn matches-path? [request path]
   (and
    (matches-uri? request path)
-   (matches-request-method? request path)
-   (matches-query-params? request path)))
+   (matches-request-method? request path)))
 
 ;; handling requests
 
