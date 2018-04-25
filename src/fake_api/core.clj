@@ -70,16 +70,19 @@
       true)))
 
 (defn matches-path? [request path]
-  (and
-   (matches-uri? request path)
-   (matches-request-method? request path)))
+  (when (and
+         (matches-uri? request path)
+         (matches-request-method? request path))
+    path))
 
 ;; handling requests
 
 (defn handler [request]
   (if-let [match (first (filter (partial matches-path? request) @paths))]
-    {:status 200
-     :body "wooo"}
+    (if (matches-query-params? request match)
+      {:status 200
+       :body "wooo"}
+      {:status 400})
     {:status 404
      :body "Not found"}))
 
