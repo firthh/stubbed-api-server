@@ -12,23 +12,22 @@
       slurp
       (parse-string true)))
 
-(def FloatS
-  (s/pred float?))
-
 (def DoubleS
   (s/pred double?))
 
 (def type-mapping
   ;; Should this support `format` as well as type?
+
   {
-   ["integer" "int64"] s/Int
-   ["integer" "int32"] s/Int ;; in CLJ they all get parsed into int64
-   ["number" "float"]  FloatS
-   ["number" "double"] DoubleS
-   ["string" nil]      s/Str})
+   "integer" s/Int
+   "number"  DoubleS
+   "string"  s/Str})
 
 (defn swagger-types->schema [types]
-  (into {} (map (fn [t] [(keyword (:name t)) (type-mapping [(:type t) (:format t)])]) types)))
+  (into {} (map (fn [t] [(if (:required t)
+                          (keyword (:name t))
+                          (s/optional-key (keyword (:name t))))
+                        (type-mapping (:type t))]) types)))
 
 (defn swagger-params->schemas [swagger]
   {})
