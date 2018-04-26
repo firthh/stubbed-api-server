@@ -16,8 +16,8 @@ Perhaps Docker will make that possible
 
 - [x] Match paths based on URI from swagger
 - [x] Match paths based on request method from swagger
-- [ ] Match paths based on query string parameters
-- [ ] Match paths based on on body of the request
+- [ ] (in progress) Match paths based on query string parameters and return http 400 when they're not valid
+- [ ] Match paths based on on body of the request and return http 400 when it's not valid
 - [ ] Return a random response body and status using one from paths (in JSON)
 - [ ] Validate request content-type matches an accepted content-type
 - [ ] Retune a response body that matches the request body
