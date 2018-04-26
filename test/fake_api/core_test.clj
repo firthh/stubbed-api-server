@@ -49,28 +49,28 @@
     (is (matches-query-params? {:query-params {}} {:parameters []})))
   (testing "correct params when theay exist"
     (is (matches-query-params?
-         {:query-params {"x" 1 "y" 2}}
+         {:query-params {:x 1 :y 2}}
          path))
     (is (matches-query-params?
-         {:query-params {"x" 1 "y" 2 "z" 3}}
+         {:query-params {:x 1 :y 2 :z 3}}
          path)))
   (testing "extra params are allowed"
     (is (matches-query-params?
-         {:query-params {"x" 1 "y" 2 "a" 5}}
+         {:query-params {:x 1 :y 2 :a 5}}
          path))
     (is (matches-query-params?
-         {:query-params {"x" 1 "y" 2 "b" 5}}
+         {:query-params {:x 1 :y 2 :b 5}}
          path)))
   (testing "missing one required param"
     (is (not (matches-query-params?
-              {:query-params {"x" 1}}
+              {:query-params {:x 1}}
               path)))
     (is (not (matches-query-params?
-              {:query-params {"x" 1 "z" 3}}
+              {:query-params {:x 1 :z 3}}
               path))))
   (testing "params of the wrong time"
     (is (not (matches-query-params?
-              {:query-params {"x" 1 "y" "a"}}
+              {:query-params {:x 1 :y "a"}}
               path)))))
 
 (deftest test-swagger-params->schemas
@@ -125,4 +125,23 @@
            (swagger-types->schema [{:name "a",
                                     :required false,
                                     :type "string"}]))))
+  )
+
+(deftest test-parse-path
+  (testing "integration test"
+    (is (= (first (parse-paths (read-schema)))
+           {:uri "/api/plus",
+            :request-method :get,
+            :parameters [{:in "query", :name "x", :description "", :required true, :type "integer", :format "int64"} {:in "query", :name "y", :description "", :required true, :type "integer", :format "int64"}],
+            :query-schema {:x s/Int
+                           :y s/Int
+                           s/Any s/Any}}))
+    (is (= (second (parse-paths (read-schema)))
+           {:uri "/api/echo",
+            :request-method :post,
+            :parameters [{:in "body", :name "Pizza", :description "", :required true, :schema {:$ref "#/definitions/Pizza"}}],
+            :query-schema {s/Any s/Any}}))))
+
+(deftest test-handler
+  ;; TODO: write integration tests around the handler
   )

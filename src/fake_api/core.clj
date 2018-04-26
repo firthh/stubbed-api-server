@@ -23,11 +23,17 @@
    "number"  DoubleS
    "string"  s/Str})
 
-(defn swagger-types->schema [types]
-  (into {} (map (fn [t] [(if (:required t)
-                          (keyword (:name t))
-                          (s/optional-key (keyword (:name t))))
-                        (type-mapping (:type t))]) types)))
+(defn schema-key [type]
+  (if (:required type)
+    (keyword (:name type))
+    (s/optional-key (keyword (:name type)))))
+
+(defn swagger-types->schema [types & [allow-extra-keys]]
+  (merge (->> types
+              (map (fn [t] [(schema-key t)
+                           (type-mapping (:type t))]))
+              (into {}))
+         (if allow-extra-keys {s/Any s/Any} {})))
 
 (defn swagger-params->schemas [swagger]
   {})
@@ -37,7 +43,8 @@
    (fn [[k v]]
      {:uri (str base-path (name path))
       :request-method k
-      :parameters (:parameters v)})
+      :parameters (:parameters v)
+      :query-schema (swagger-types->schema (filter (fn [t] (= "query" (:in t))) (:parameters v)) true)})
    requests))
 
 (defn parse-paths [schema]
@@ -64,9 +71,12 @@
 
 (defn matches-query-params? [request path]
   (let [query-params (:query-params request)
-        QueryParams (swagger-types->schema (filter (fn [t] (= "query" (:in t))) (:parameters path)))]
-    (if (s/check QueryParams query-params)
-      false
+        ;; TODO: This no longer needs to be here any more
+        QueryParams (swagger-types->schema (filter (fn [t] (= "query" (:in t))) (:parameters path)) true)]
+    (if-let [r (s/check QueryParams query-params)]
+      (do
+        ;; (prn r) ;; make it easier to debug. Should we return this in the http response?
+        false)
       true)))
 
 (defn matches-path? [request path]
@@ -77,15 +87,16 @@
 
 ;; handling requests
 
-(defn handler [request]
-  (if-let [match (first (filter (partial matches-path? request) @paths))]
-    (if (matches-query-params? request match)
-      {:status 200
-       :body "wooo"}
-      {:status 400})
-    {:status 404
-     :body "Not found"}))
+(defn handler [paths]
+  (fn [request]
+    (if-let [match (first (filter (partial matches-path? request) paths))]
+      (if (matches-query-params? request match)
+        {:status 200
+         :body "wooo"}
+        {:status 400})
+      {:status 404
+       :body "Not found"})))
 
 (def app
-  (-> handler
+  (-> (handler @paths)
       wrap-params))
