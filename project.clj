@@ -9,4 +9,5 @@
                  [prismatic/schema    "1.1.9"]]
   :plugins [[lein-ring "0.12.3"]
             [lein-auto "0.1.3"]]
+  :profiles {:test {:dependencies [[ring/ring-mock "0.3.2"]]}}
   :ring {:handler fake-api.core/app})

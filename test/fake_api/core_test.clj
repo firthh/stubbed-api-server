@@ -1,7 +1,8 @@
 (ns fake-api.core-test
   (:require [clojure.test :refer :all]
             [fake-api.core :refer :all]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [ring.mock.request :as mock]))
 
 (def request
   {
@@ -49,28 +50,28 @@
     (is (matches-query-params? {:query-params {}} {:parameters []})))
   (testing "correct params when theay exist"
     (is (matches-query-params?
-         {:query-params {:x 1 :y 2}}
+         {:query-params {:x "1" :y "2"}}
          path))
     (is (matches-query-params?
-         {:query-params {:x 1 :y 2 :z 3}}
+         {:query-params {:x "1" :y "2" :z "3"}}
          path)))
   (testing "extra params are allowed"
     (is (matches-query-params?
-         {:query-params {:x 1 :y 2 :a 5}}
+         {:query-params {:x "1" :y "2" :a "5"}}
          path))
     (is (matches-query-params?
-         {:query-params {:x 1 :y 2 :b 5}}
+         {:query-params {:x "1" :y "2" :b "5"}}
          path)))
   (testing "missing one required param"
     (is (not (matches-query-params?
-              {:query-params {:x 1}}
+              {:query-params {:x "1"}}
               path)))
     (is (not (matches-query-params?
-              {:query-params {:x 1 :z 3}}
+              {:query-params {:x "1" :z "3"}}
               path))))
   (testing "params of the wrong time"
     (is (not (matches-query-params?
-              {:query-params {:x 1 :y "a"}}
+              {:query-params {:x "1" :y "a"}}
               path)))))
 
 (deftest test-swagger-params->schemas
@@ -81,7 +82,7 @@
   (testing "empty types"
     (is (= {} (swagger-types->schema []))))
   (testing "a single integer type"
-    (is (= {:a s/Int} (swagger-types->schema [{:name "a",
+    (is (= {:a IntStr} (swagger-types->schema [{:name "a",
                                                :required true,
                                                :type "integer",
                                                :format "int64"}])))
@@ -133,8 +134,8 @@
            {:uri "/api/plus",
             :request-method :get,
             :parameters [{:in "query", :name "x", :description "", :required true, :type "integer", :format "int64"} {:in "query", :name "y", :description "", :required true, :type "integer", :format "int64"}],
-            :query-schema {:x s/Int
-                           :y s/Int
+            :query-schema {:x IntStr
+                           :y IntStr
                            s/Any s/Any}}))
     (is (= (second (parse-paths (read-schema)))
            {:uri "/api/echo",
@@ -144,4 +145,7 @@
 
 (deftest test-handler
   ;; TODO: write integration tests around the handler
-  )
+  (is (= (:status (app (mock/request :get "/api/plus?x=13&y=24")))
+         200))
+  (is (= (:status (app (mock/request :get "/api/plus?x=1&y=abc")))
+         400)))

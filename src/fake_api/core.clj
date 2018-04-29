@@ -15,13 +15,17 @@
 (def DoubleS
   (s/pred double?))
 
+(def IntStr
+  (s/pred #(re-matches #"^[0-9]+" %)))
+
 (def type-mapping
   ;; Should this support `format` as well as type?
-
+  ;; QueryString params are strings, let's leave them that way
   {
-   "integer" s/Int
+   "integer" IntStr
    "number"  DoubleS
-   "string"  s/Str})
+   "string"  s/Str
+   })
 
 (defn schema-key [type]
   (if (:required type)
@@ -97,6 +101,14 @@
       {:status 404
        :body "Not found"})))
 
+(defn keywordize-keys [m]
+  (into {} (map (fn [[k v]] [(keyword k) v]) m)))
+
+(defn wrap-keywordize-params [handler]
+  (fn [request]
+    (handler (update request :query-params keywordize-keys))))
+
 (def app
   (-> (handler @paths)
+      wrap-keywordize-params
       wrap-params))
