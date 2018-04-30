@@ -97,10 +97,10 @@
   ;;                                              :type "number",
   ;;                                              :format "float"}]))))
   (testing "a single double"
-    (is (= {:a DoubleS} (swagger-types->schema [{:name "a",
-                                                 :required true,
-                                                 :type "number",
-                                                 :format "double"}]))))
+    (is (= {:a DoubleStr} (swagger-types->schema [{:name "a",
+                                                   :required true,
+                                                   :type "number",
+                                                   :format "double"}]))))
   (testing "a single string"
     (is (= {:a s/Str} (swagger-types->schema [{:name "a",
                                                :required true,

@@ -14,6 +14,8 @@
 
 (def DoubleS
   (s/pred double?))
+(def DoubleStr
+  (s/pred #(re-matches #"^[0-9]+(\.[0-9]+)?$" %)))
 
 (def IntStr
   (s/pred #(re-matches #"^[0-9]+" %)))
@@ -23,7 +25,7 @@
   ;; QueryString params are strings, let's leave them that way
   {
    "integer" IntStr
-   "number"  DoubleS
+   "number"  DoubleStr
    "string"  s/Str
    })
 
