@@ -142,10 +142,3 @@
             :request-method :post,
             :parameters [{:in "body", :name "Pizza", :description "", :required true, :schema {:$ref "#/definitions/Pizza"}}],
             :query-schema {s/Any s/Any}}))))
-
-(deftest test-handler
-  ;; TODO: write integration tests around the handler
-  (is (= (:status (app (mock/request :get "/api/plus?x=13&y=24")))
-         200))
-  (is (= (:status (app (mock/request :get "/api/plus?x=1&y=abc")))
-         400)))

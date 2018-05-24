@@ -6,8 +6,8 @@
 
 ;; loading data
 
-(defn read-schema []
-  (-> "swagger.json"
+(defn read-schema [file-name]
+  (-> file-name
       io/resource
       slurp
       (parse-string true)))
@@ -57,7 +57,8 @@
   (let [base-path (:basePath schema)]
     (mapcat (partial parse-path base-path) (:paths schema))))
 
-(def paths (delay (parse-paths (read-schema))))
+(defn paths [file-name]
+  (parse-paths (read-schema file-name)))
 
 ;; matching requests
 
@@ -111,6 +112,6 @@
     (handler (update request :query-params keywordize-keys))))
 
 (def app
-  (-> (handler @paths)
+  (-> (handler (paths "swagger.json"))
       wrap-keywordize-params
       wrap-params))
